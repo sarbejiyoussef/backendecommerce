@@ -1,9 +1,11 @@
 const express=require("express")
 const Categorie=require("../models/categorie")
 const req = require("express/lib/request")
+const { verifyToken } = require("../models/middleware/verify-token")
+const { authorizeRoles } = require("../models/middleware/authorizeRoles")
 const router=express.Router()
 
-router.post("/",async (req,res)=>{
+router.post("/",verifyToken,authorizeRoles("admin","visiteur"),async (req,res)=>{
     const cat1= new Categorie(req.body)
     try{
         await cat1.save()
@@ -14,7 +16,7 @@ router.post("/",async (req,res)=>{
         res.status(404).json({message:error.message})
     }
 })
-router.get ("/",async(req,res)=>{
+router.get ("/",verifyToken,async(req,res)=>{
     try{
         const cat=await Categorie.find({}, null, {sort: {'_id': -1}})
         res.status(200).json(cat)
